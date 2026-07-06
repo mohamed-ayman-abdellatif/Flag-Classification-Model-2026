@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IPYNB checkpoints
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Datasets and runs
+kaggle_classification_dataset/
+kaggle_classification_temp/
+kaggle_classification_kernel_temp/
+runs/
+*.zip
