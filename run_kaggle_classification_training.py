@@ -70,64 +70,9 @@ def main():
     # prep_script = os.path.join(base_dir, "generate_classification_dataset.py")
     # subprocess.check_call([sys.executable, prep_script])
     
-    # 2. Zip and upload classification dataset
-    print("\n=== Preparing dataset upload to Kaggle ===")
-    os.makedirs(temp_dataset_dir, exist_ok=True)
-    zip_filepath = os.path.join(temp_dataset_dir, "dataset.zip")
+    # 2. Skip local zipping and upload of the dataset since both datasets are already public on Kaggle
+    print("\n=== Dataset upload skipped: using pre-existing Kaggle datasets ===")
     
-    # Zip the compiled classification dataset
-    zip_directory(dataset_src, zip_filepath)
-    
-    # Write dataset metadata
-    dataset_slug = "drone-flag-classification-dataset-2026"
-    dataset_ref = f"{username}/{dataset_slug}"
-    dataset_metadata = {
-        "title": "Drone Flag Classification Dataset 2026",
-        "id": dataset_ref,
-        "licenses": [{"name": "CC0-1.0"}]
-    }
-    
-    with open(os.path.join(temp_dataset_dir, "dataset-metadata.json"), "w") as f:
-        json.dump(dataset_metadata, f, indent=4)
-        
-    # Check if dataset exists
-    status_res = run_cli_cmd(['datasets', 'status', dataset_ref], env)
-    exists = status_res.returncode == 0
-    
-    if exists:
-        print(f"Dataset {dataset_ref} exists on Kaggle. Uploading a new version...")
-        res = run_cli_cmd(['datasets', 'version', '-p', temp_dataset_dir, '-m', "Update classification dataset"], env)
-    else:
-        print(f"Creating new dataset {dataset_ref} on Kaggle...")
-        res = run_cli_cmd(['datasets', 'create', '-p', temp_dataset_dir], env)
-        
-    print("STDOUT:", res.stdout)
-    print("STDERR:", res.stderr)
-    
-    if res.returncode != 0:
-        print("[ERROR] Failed to upload dataset to Kaggle.")
-        sys.exit(1)
-    print("Dataset successfully uploaded!")
-    
-    # Wait for dataset to be ready/processed on Kaggle
-    print("Waiting for dataset to be ready/processed on Kaggle...")
-    while True:
-        status_res = run_cli_cmd(['datasets', 'status', dataset_ref], env)
-        if status_res.returncode == 0:
-            status = status_res.stdout.strip()
-            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Dataset Status: {status}")
-            if status == "ready":
-                break
-        else:
-            print(f"Error checking dataset status: {status_res.stderr}")
-        time.sleep(15)
-        
-    # Clean up zipped dataset to save space
-    try:
-        os.remove(zip_filepath)
-    except Exception:
-        pass
-
     # 3. Prepare and push Kaggle Kernel (Notebook)
     print("\n=== Preparing Kaggle kernel metadata ===")
     os.makedirs(temp_kernel_dir, exist_ok=True)
@@ -148,7 +93,10 @@ def main():
         "enable_gpu": "true",
         "enable_tpu": "false",
         "enable_internet": "true",
-        "dataset_sources": [dataset_ref],
+        "dataset_sources": [
+            "mariamzakaria14/new-dataset-updated-296-cropped-mergedd",
+            "stcky391/drone-flag-classification-dataset-2026"
+        ],
         "competition_sources": [],
         "kernel_sources": [],
         "model_sources": []
